@@ -1,0 +1,124 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import PostCard from '@components/PostCard.astro';
+import { Icon } from 'lucide-astro';
+import { getCollection } from 'astro:content';
+import { generateStructuredData } from '@lib/seo';
+
+const featuredPosts = (await getCollection('blog'))
+  .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime())
+  .slice(0, 3);
+
+const structuredData = generateStructuredData('WebSite');
+---
+
+<BaseLayout title="Home" description="A high-performance, modern Astro-based static site generator">
+  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+  
+  <!-- Hero Section -->
+  <section class="container-custom py-20 md:py-32">
+    <div class="mx-auto max-w-3xl text-center">
+      <h1 class="text-4xl md:text-6xl font-bold mb-6 text-text-primary">
+        Welcome to Astro Static Site Generator
+      </h1>
+      <p class="text-xl text-text-secondary mb-8">
+        A high-performance, modern content site with dynamic islands, excellent SEO, and hybrid rendering.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a
+          href="/blog"
+          class="px-6 py-3 rounded-lg bg-primary text-white font-medium hover:opacity-90 transition-opacity"
+        >
+          Explore Blog
+        </a>
+        <a
+          href="/about"
+          class="px-6 py-3 rounded-lg border border-border bg-bg-secondary text-text-primary font-medium hover:bg-bg-primary transition-colors"
+        >
+          Learn More
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Posts -->
+  {featuredPosts.length > 0 && (
+    <section class="container-custom py-16">
+      <div class="mb-12 text-center">
+        <h2 class="text-3xl font-bold mb-4 text-text-primary">Featured Posts</h2>
+        <p class="text-text-secondary">Latest articles and insights</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {featuredPosts.map((post) => (
+          <PostCard post={post} />
+        ))}
+      </div>
+      <div class="text-center mt-8">
+        <a
+          href="/blog"
+          class="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border bg-bg-secondary text-text-primary font-medium hover:bg-bg-primary transition-colors"
+        >
+          View All Posts
+          <Icon name="arrow-right" size={20} />
+        </a>
+      </div>
+    </section>
+  )}
+
+  <!-- About Snippet -->
+  <section class="container-custom py-16 border-t border-border">
+    <div class="mx-auto max-w-3xl">
+      <h2 class="text-3xl font-bold mb-6 text-text-primary">About This Project</h2>
+      <div class="prose-custom text-text-secondary">
+        <p>
+          This is a production-ready Astro static site generator showcasing modern web development
+          best practices. Built with TypeScript, Tailwind CSS, and React islands for interactivity,
+          it demonstrates excellent SEO, performance optimization, and accessibility.
+        </p>
+        <p>
+          Features include hybrid rendering, dynamic components, MDX support, dark mode, and
+          comprehensive SEO with structured data, sitemaps, and Open Graph tags.
+        </p>
+      </div>
+      <div class="mt-6">
+        <a
+          href="/about"
+          class="inline-flex items-center gap-2 text-primary font-medium hover:underline"
+        >
+          Read more about us
+          <Icon name="arrow-right" size={18} />
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter Signup -->
+  <section class="container-custom py-16 border-t border-border">
+    <div class="mx-auto max-w-2xl text-center">
+      <h2 class="text-3xl font-bold mb-4 text-text-primary">Stay Updated</h2>
+      <p class="text-text-secondary mb-8">
+        Subscribe to our newsletter for the latest posts and updates.
+      </p>
+      <form
+        class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto"
+        onsubmit={(e) => {
+          e.preventDefault();
+          alert('Newsletter signup is a demo feature. In production, this would connect to your email service.');
+        }}
+      >
+        <input
+          type="email"
+          placeholder="Enter your email"
+          required
+          class="flex-1 px-4 py-3 rounded-lg border border-border bg-bg-primary text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-primary"
+        />
+        <button
+          type="submit"
+          class="px-6 py-3 rounded-lg bg-primary text-white font-medium hover:opacity-90 transition-opacity whitespace-nowrap"
+        >
+          Subscribe
+        </button>
+      </form>
+    </div>
+  </section>
+</BaseLayout>

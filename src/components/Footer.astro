@@ -1,0 +1,63 @@
+---
+import { Icon } from 'lucide-astro';
+import { siteConfig } from '@lib/config';
+
+const currentYear = new Date().getFullYear();
+const socialLinks = [
+  { name: 'GitHub', href: 'https://github.com', icon: 'github' },
+  { name: 'Twitter', href: 'https://twitter.com', icon: 'twitter' },
+  { name: 'LinkedIn', href: 'https://linkedin.com', icon: 'linkedin' },
+];
+---
+
+<footer class="border-t border-border bg-bg-secondary">
+  <div class="container-custom py-12">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div>
+        <h3 class="text-lg font-semibold mb-4 text-text-primary">{siteConfig.title}</h3>
+        <p class="text-sm text-text-secondary">
+          {siteConfig.description}
+        </p>
+      </div>
+      
+      <div>
+        <h3 class="text-lg font-semibold mb-4 text-text-primary">Quick Links</h3>
+        <ul class="space-y-2 text-sm">
+          <li>
+            <a href="/" class="text-text-secondary hover:text-primary transition-colors">Home</a>
+          </li>
+          <li>
+            <a href="/blog" class="text-text-secondary hover:text-primary transition-colors">Blog</a>
+          </li>
+          <li>
+            <a href="/about" class="text-text-secondary hover:text-primary transition-colors">About</a>
+          </li>
+          <li>
+            <a href="/contact" class="text-text-secondary hover:text-primary transition-colors">Contact</a>
+          </li>
+        </ul>
+      </div>
+      
+      <div>
+        <h3 class="text-lg font-semibold mb-4 text-text-primary">Connect</h3>
+        <div class="flex gap-4">
+          {socialLinks.map((social) => (
+            <a
+              href={social.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-text-secondary hover:text-primary transition-colors"
+              aria-label={social.name}
+            >
+              <Icon name={social.icon} size={20} />
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+    
+    <div class="mt-8 pt-8 border-t border-border text-center text-sm text-text-secondary">
+      <p>&copy; {currentYear} {siteConfig.title}. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
