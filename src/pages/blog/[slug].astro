@@ -1,0 +1,123 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import PostCard from '@components/PostCard.astro';
+import CommentsIsland from '@components/CommentsIsland.tsx';
+import { getCollection } from 'astro:content';
+import { formatDate, calculateReadingTime } from '@lib/utils';
+import { generateStructuredData } from '@lib/seo';
+import { siteConfig } from '@lib/config';
+import { Icon } from 'lucide-astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: Awaited<ReturnType<typeof getCollection>>[number];
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+const { title, description, publishDate, tags, category, image, author, readingTime } = post.data;
+
+const allPosts = await getCollection('blog');
+const relatedPosts = allPosts
+  .filter((p) => p.slug !== post.slug && (p.data.tags.some((tag) => tags.includes(tag)) || p.data.category === category))
+  .slice(0, 3);
+
+const readingTimeMinutes = readingTime || calculateReadingTime(post.body);
+
+const structuredData = generateStructuredData('Article', {
+  headline: title,
+  description,
+  image: image ? `${siteConfig.url}${image}` : undefined,
+  datePublished: publishDate.toISOString(),
+  dateModified: publishDate.toISOString(),
+  author,
+});
+
+const seoTags = {
+  title,
+  description,
+  image,
+  type: 'article' as const,
+  publishedTime: publishDate.toISOString(),
+  tags,
+};
+---
+
+<BaseLayout seo={seoTags}>
+  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+  
+  <article class="container-custom py-12">
+    <!-- Header -->
+    <header class="mb-8">
+      <div class="flex flex-wrap gap-2 mb-4">
+        <span class="text-sm font-medium px-3 py-1 rounded-full bg-primary/10 text-primary">
+          {category}
+        </span>
+        {tags.map((tag) => (
+          <span class="text-sm px-3 py-1 rounded-full border border-border bg-bg-secondary text-text-secondary">
+            {tag}
+          </span>
+        ))}
+      </div>
+      
+      <h1 class="text-4xl md:text-5xl font-bold mb-4 text-text-primary">{title}</h1>
+      <p class="text-xl text-text-secondary mb-6">{description}</p>
+      
+      <div class="flex flex-wrap items-center gap-4 text-sm text-text-secondary">
+        <div class="flex items-center gap-2">
+          <Icon name="user" size={16} />
+          <span>{author}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <Icon name="calendar" size={16} />
+          <time datetime={publishDate.toISOString()}>{formatDate(publishDate)}</time>
+        </div>
+        <div class="flex items-center gap-2">
+          <Icon name="clock" size={16} />
+          <span>{readingTimeMinutes} min read</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Featured Image -->
+    {image && (
+      <div class="mb-8 rounded-lg overflow-hidden">
+        <img
+          src={image}
+          alt={title}
+          class="w-full h-auto object-cover"
+          loading="eager"
+        />
+      </div>
+    )}
+
+    <!-- Content -->
+    <div class="prose-custom max-w-4xl mx-auto">
+      <Content />
+    </div>
+
+    <!-- Comments -->
+    <div class="max-w-4xl mx-auto mt-12">
+      <CommentsIsland client:load postSlug={post.slug} />
+    </div>
+
+    <!-- Related Posts -->
+    {relatedPosts.length > 0 && (
+      <section class="mt-16 pt-16 border-t border-border">
+        <h2 class="text-2xl font-bold mb-8 text-text-primary">Related Posts</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {relatedPosts.map((relatedPost) => (
+            <PostCard post={relatedPost} />
+          ))}
+        </div>
+      </section>
+    )}
+  </article>
+</BaseLayout>
